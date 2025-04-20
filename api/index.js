@@ -2,9 +2,9 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const { Pool } = require('pg');
 const cors = require('cors'); 
-const session = require('express-session');
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
+// const session = require('express-session');
+// const passport = require('passport');
+// const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const app = express();
 
 app.use(cors());
@@ -94,62 +94,62 @@ app.post('/login', async (req, res) => {
 });
 
 
-// GOOGLE AUTH
-const SECRET_KEY = 'c1f46eee8c1b09d7667519796021ed0701a452ea208bb6107f392b3108d47b99e7fae774fd7914ceea0d202631507b7633311af1976983370889fd8984a65ebc';
+// // GOOGLE AUTH
+// const SECRET_KEY = 'c1f46eee8c1b09d7667519796021ed0701a452ea208bb6107f392b3108d47b99e7fae774fd7914ceea0d202631507b7633311af1976983370889fd8984a65ebc';
 
-// Session and Passport (kept for Google Auth)
-app.use(session({ secret: SECRET_KEY, resave: false, saveUninitialized: true }));
-app.use(passport.initialize());
-app.use(passport.session());
+// // Session and Passport (kept for Google Auth)
+// app.use(session({ secret: SECRET_KEY, resave: false, saveUninitialized: true }));
+// app.use(passport.initialize());
+// app.use(passport.session());
 
-// Google Strategy (optional)
-passport.use(new GoogleStrategy({
-  clientID: '1046052573504-3f0ug0rus1t7dd8k84ckh06lslg36h1j.apps.googleusercontent.com',
-  clientSecret: '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',
-  callbackURL: 'http://localhost:5000/auth/google/callback'
-}, async (accessToken, refreshToken, profile, done) => {
-  try {
-    const email = profile.emails[0].value;
-    const username = profile.displayName;
-    let user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (user.rows.length === 0) {
-      user = await pool.query(
-        'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *',
-        [username, email, '']
-      );
-    }
-    done(null, user.rows[0]);
-  } catch (error) {
-    done(error, null);
-  }
-}));
+// // Google Strategy (optional)
+// passport.use(new GoogleStrategy({
+//   clientID: '1046052573504-3f0ug0rus1t7dd8k84ckh06lslg36h1j.apps.googleusercontent.com',
+//   clientSecret: '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',
+//   callbackURL: 'http://localhost:5000/auth/google/callback'
+// }, async (accessToken, refreshToken, profile, done) => {
+//   try {
+//     const email = profile.emails[0].value;
+//     const username = profile.displayName;
+//     let user = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+//     if (user.rows.length === 0) {
+//       user = await pool.query(
+//         'INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *',
+//         [username, email, '']
+//       );
+//     }
+//     done(null, user.rows[0]);
+//   } catch (error) {
+//     done(error, null);
+//   }
+// }));
 
-passport.serializeUser((user, done) => done(null, user.id));
-passport.deserializeUser(async (id, done) => {
-  const user = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
-  done(null, user.rows[0]);
-});
+// passport.serializeUser((user, done) => done(null, user.id));
+// passport.deserializeUser(async (id, done) => {
+//   const user = await pool.query('SELECT * FROM users WHERE id = $1', [id]);
+//   done(null, user.rows[0]);
+// });
 
 
-// Google Auth Routes
-app.get('/auth/google',
-    passport.authenticate('google', { scope: ['profile', 'email'] })
-  );
+// // Google Auth Routes
+// app.get('/auth/google',
+//     passport.authenticate('google', { scope: ['profile', 'email'] })
+//   );
   
-  app.get('/auth/google/callback', 
-    passport.authenticate('google', { 
-      failureRedirect: '/login',
-      session: false // We're not using sessions for our API
-    }),
-    (req, res) => {
-      // Successful authentication, return user info or JWT
-      res.json({
-        success: true,
-        message: "Google login successful",
-        user: req.user
-      });
-    }
-  );
+//   app.get('/auth/google/callback', 
+//     passport.authenticate('google', { 
+//       failureRedirect: '/login',
+//       session: false // We're not using sessions for our API
+//     }),
+//     (req, res) => {
+//       // Successful authentication, return user info or JWT
+//       res.json({
+//         success: true,
+//         message: "Google login successful",
+//         user: req.user
+//       });
+//     }
+//   );
 
   app.post('/produk', async (req, res) => {
     const {
